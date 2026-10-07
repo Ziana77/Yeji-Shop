@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Yeji Shop</title>
+    <title>YEJI SHOP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
@@ -14,11 +14,13 @@
       <div class="container nav">
         <div class="brand-wrap">
           <div class="brand-mark">♥</div>
-          <div class="brand">Yeji Shop</div>
+          <div class="brand">YEJI SHOP</div>
         </div>
         <nav>
           <a href="#products">新品</a>
           <a href="#featured">推薦</a>
+          <a href="#wishlist">願望清單</a>
+          <a href="#gifts">滿額禮</a>
           <a href="#cart">購物車</a>
         </nav>
         <button class="cart-button" id="cartToggle">
@@ -31,10 +33,10 @@
       <section class="hero">
         <div class="container hero-inner">
           <div class="hero-copy">
-            <span class="eyebrow">黑色系愛心風</span>
+            <span class="eyebrow">黑・白・灰豹紋系列</span>
             <h1>有品味，才有自信</h1>
             <p>
-              Yeji Shop 精選彩妝、配件、服飾與特色餅乾，將日常穿搭與美妝風格
+              YEJI SHOP 精選彩妝、配件、服飾與特色餅乾，將日常穿搭與美妝風格
               融成一種慵懶但有型的生活方式。
             </p>
             <div class="hero-actions">
@@ -48,7 +50,7 @@
               <div class="mini-image mini-one"></div>
               <div>
                 <h3>黑色愛心唇膏</h3>
-                <p>NT$ 990</p>
+                <p>NT$ 526</p>
               </div>
             </div>
             <div class="mini-product">
@@ -72,6 +74,43 @@
         </div>
       </section>
 
+      <section class="gift-section" id="gifts">
+        <div class="container">
+          <div class="section-header">
+            <p>SHOP &amp; GET</p>
+            <h2>滿額好禮</h2>
+          </div>
+          <div class="gift-grid">
+            <article class="gift-card">
+              <span class="gift-amount">滿 NT$ 1,500</span>
+              <h3>隨機造型小卡</h3>
+              <p>消費達門檻，即可獲得一張原創風格隨機小卡。</p>
+            </article>
+            <article class="gift-card">
+              <span class="gift-amount">滿 NT$ 3,000</span>
+              <h3>灰灰荷蘭豬鑰匙圈</h3>
+              <p>達門檻累計獲得前一階滿額禮，再加贈原創荷蘭豬示意周邊。</p>
+            </article>
+            <article class="gift-card">
+              <span class="gift-amount">每滿 NT$ 5,000</span>
+              <h3>荷蘭豬視訊互動抽獎券</h3>
+              <p>每月底抽出 3 位幸運兒，與荷蘭豬視訊互動 2 分鐘。</p>
+            </article>
+          </div>
+          <p class="gift-disclaimer">活動頁面示意：此網站目前沒有訂單或抽獎後端，購物車僅供本機預覽，尚不會實際發送贈品或登記抽獎資格。</p>
+        </div>
+      </section>
+
+      <section class="wishlist-section" id="wishlist">
+        <div class="container">
+          <div class="section-header">
+            <p>YOUR PICKS</p>
+            <h2>我的願望清單</h2>
+          </div>
+          <div class="product-grid" id="wishlistGrid"></div>
+        </div>
+      </section>
+
       <section class="products" id="products">
         <div class="container">
           <div class="section-header split">
@@ -85,6 +124,7 @@
               <button class="filter" data-category="服飾">服飾</button>
               <button class="filter" data-category="配件">配件</button>
               <button class="filter" data-category="零食">零食</button>
+              <button class="filter" data-category="favorites">我的收藏</button>
             </div>
           </div>
           <div class="product-grid" id="productGrid"></div>
@@ -97,6 +137,7 @@
         <h3>購物車</h3>
         <button id="closeCart">關閉</button>
       </div>
+      <div class="gift-progress" id="giftProgress" aria-live="polite"></div>
       <div class="cart-items" id="cartItems"></div>
       <div class="cart-summary">
         <div class="row">

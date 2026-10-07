@@ -75,6 +75,7 @@ const products = [
 
 const productGrid = document.getElementById('productGrid');
 const featuredGrid = document.getElementById('featuredGrid');
+const wishlistGrid = document.getElementById('wishlistGrid');
 const cartItems = document.getElementById('cartItems');
 const cartCount = document.getElementById('cartCount');
 const subtotalEl = document.getElementById('subtotal');
@@ -82,72 +83,78 @@ const shippingEl = document.getElementById('shipping');
 const totalEl = document.getElementById('total');
 const cartPanel = document.getElementById('cart');
 const overlay = document.getElementById('overlay');
+const giftProgress = document.getElementById('giftProgress');
 const filterButtons = document.querySelectorAll('.filter');
 
 const cart = JSON.parse(localStorage.getItem('sunrise-cart')) || [];
+const favorites = new Set(JSON.parse(localStorage.getItem('yeji-shop-wishlist')) || []);
+let selectedCategory = 'all';
 
 function formatPrice(value) {
   return `NT$ ${value.toLocaleString()}`;
 }
 
+function renderProductCard(product, metaLabel) {
+  const isFavorite = favorites.has(product.id);
+
+  return `
+    <article class="card">
+      <div class="image-box ${product.id % 3 === 0 ? 'three' : product.id % 2 === 0 ? 'two' : 'one'}" style="background:${product.gradient};">
+        <span class="tag">${product.tag}</span>
+        <button
+          class="favorite-btn${isFavorite ? ' active' : ''}"
+          type="button"
+          data-action="favorite"
+          data-id="${product.id}"
+          aria-label="${isFavorite ? '從願望清單移除' : '加入願望清單'}：${product.name}"
+          aria-pressed="${isFavorite}"
+        >♥</button>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span>${product.category}</span>
+          <span>${metaLabel}</span>
+        </div>
+        <h3>${product.name}</h3>
+        <p>${product.description}</p>
+        <div class="price-row">
+          <span class="price">${formatPrice(product.price)}</span>
+          <button class="add-btn" type="button" data-id="${product.id}">加入購物車</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
 function renderFeaturedProducts() {
   const featured = products.slice(0, 4);
 
-  featuredGrid.innerHTML = featured
-    .map(
-      (product) => `
-        <article class="card">
-          <div class="image-box ${product.id % 2 === 0 ? 'two' : 'one'}" style="background:${product.gradient};">
-            <span class="tag">${product.tag}</span>
-          </div>
-          <div class="card-body">
-            <div class="card-meta">
-              <span>${product.category}</span>
-              <span>人氣</span>
-            </div>
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <div class="price-row">
-              <span class="price">${formatPrice(product.price)}</span>
-              <button class="add-btn" data-id="${product.id}">加入購物車</button>
-            </div>
-          </div>
-        </article>
-      `
-    )
-    .join('');
+  featuredGrid.innerHTML = featured.map((product) => renderProductCard(product, '人氣')).join('');
 }
 
-function renderProducts(category = 'all') {
+function renderProducts(category = selectedCategory) {
   let visible = products;
 
-  if (category !== 'all') {
+  if (category === 'favorites') {
+    visible = products.filter((product) => favorites.has(product.id));
+  } else if (category !== 'all') {
     visible = products.filter((product) => product.category === category);
   }
 
-  productGrid.innerHTML = visible
-    .map(
-      (product) => `
-        <article class="card">
-          <div class="image-box ${product.id % 3 === 0 ? 'three' : product.id % 2 === 0 ? 'two' : 'one'}" style="background:${product.gradient};">
-            <span class="tag">${product.tag}</span>
-          </div>
-          <div class="card-body">
-            <div class="card-meta">
-              <span>${product.category}</span>
-              <span>庫存充足</span>
-            </div>
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <div class="price-row">
-              <span class="price">${formatPrice(product.price)}</span>
-              <button class="add-btn" data-id="${product.id}">加入購物車</button>
-            </div>
-          </div>
-        </article>
-      `
-    )
-    .join('');
+  productGrid.innerHTML = visible.length
+    ? visible.map((product) => renderProductCard(product, '庫存充足')).join('')
+    : '<p class="empty-wishlist">還沒有收藏商品，點商品卡片上的愛心即可加入。</p>';
+}
+
+function renderWishlist() {
+  const savedProducts = products.filter((product) => favorites.has(product.id));
+  wishlistGrid.innerHTML = savedProducts.length
+    ? savedProducts.map((product) => renderProductCard(product, '已收藏')).join('')
+    : '<p class="empty-wishlist">願望清單還是空的，逛逛商品並點選愛心收藏吧！</p>';
+}
+
+function saveFavorites() {
+  localStorage.setItem('yeji-shop-wishlist', JSON.stringify([...favorites]));
 }
 
 function saveCart() {
@@ -190,9 +197,39 @@ function removeItem(productId) {
   renderCart();
 }
 
+function getSubtotal() {
+  return cart.reduce((sum, item) => {
+    const product = products.find((entry) => entry.id === item.id);
+    return sum + (product ? product.price * item.quantity : 0);
+  }, 0);
+}
+
+function renderGiftProgress(subtotal) {
+  const nextMilestone = subtotal < 1500
+    ? 1500
+    : subtotal < 3000
+      ? 3000
+      : (Math.floor(subtotal / 5000) + 1) * 5000;
+  const ticketCount = Math.floor(subtotal / 5000);
+  const nextMessage = subtotal >= nextMilestone
+    ? ''
+    : `再消費 ${formatPrice(nextMilestone - subtotal)}，即可達成下一個滿額門檻。`;
+
+  giftProgress.innerHTML = `
+    <p><strong>滿額禮進度</strong>（依商品小計計算）</p>
+    <p>${subtotal >= 1500 ? '✓' : '○'} 滿 NT$ 1,500：隨機造型小卡一張</p>
+    <p>${subtotal >= 3000 ? '✓' : '○'} 滿 NT$ 3,000：再加贈灰灰荷蘭豬鑰匙圈</p>
+    <p>${ticketCount ? '✓' : '○'} 視訊互動抽獎券：${ticketCount} 張（每滿 NT$ 5,000 一張）</p>
+    ${nextMessage ? `<p>${nextMessage}</p>` : ''}
+    <p>每月底抽出 3 位，與荷蘭豬視訊互動 2 分鐘。</p>
+  `;
+}
+
 function renderCart() {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   cartCount.textContent = totalItems;
+  const subtotal = getSubtotal();
+  renderGiftProgress(subtotal);
 
   if (cart.length === 0) {
     cartItems.innerHTML = '<p class="empty">購物車還是空的，快去挑選好物吧！</p>';
@@ -231,11 +268,6 @@ function renderCart() {
 
   cartItems.innerHTML = cartProducts;
 
-  const subtotal = cart.reduce((sum, item) => {
-    const product = products.find((entry) => entry.id === item.id);
-    return sum + (product ? product.price * item.quantity : 0);
-  }, 0);
-
   const shipping = subtotal > 0 ? 150 : 0;
   const total = subtotal + shipping;
 
@@ -258,11 +290,27 @@ filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     filterButtons.forEach((btn) => btn.classList.remove('active'));
     button.classList.add('active');
-    renderProducts(button.dataset.category);
+    selectedCategory = button.dataset.category;
+    renderProducts();
   });
 });
 
 document.addEventListener('click', (event) => {
+  const favoriteButton = event.target.closest('.favorite-btn');
+  if (favoriteButton) {
+    const productId = Number(favoriteButton.dataset.id);
+    if (favorites.has(productId)) {
+      favorites.delete(productId);
+    } else {
+      favorites.add(productId);
+    }
+    saveFavorites();
+    renderFeaturedProducts();
+    renderProducts();
+    renderWishlist();
+    return;
+  }
+
   const addButton = event.target.closest('.add-btn');
   if (addButton) {
     addToCart(Number(addButton.dataset.id));
@@ -299,4 +347,5 @@ document.addEventListener('click', (event) => {
 
 renderFeaturedProducts();
 renderProducts();
+renderWishlist();
 renderCart();
