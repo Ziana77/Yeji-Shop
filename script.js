@@ -3,7 +3,7 @@ const products = [
     id: 1,
     name: '黑色愛心唇膏',
     category: '彩妝',
-    price: 990,
+    price: 526,
     description: '微霧感持色，日常上妝也能很有氣質。',
     tag: '新品',
     gradient: 'linear-gradient(135deg, #d7d4cf, #f1efee)'
